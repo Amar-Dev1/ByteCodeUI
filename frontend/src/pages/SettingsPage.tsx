@@ -3,20 +3,20 @@ import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 
 const AVATAR_OPTIONS = [
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Jude",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Leo",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Mia",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Aidan",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Jack",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Lily",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Oliver",
+  "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Felix",
+  "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Aneka",
+  "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Jude",
+  "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Leo",
+  "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Mia",
+  "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Aidan",
+  "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Sarah",
+  "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Jack",
+  "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Lily",
+  "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Oliver",
 ];
 
 const SettingsPage = () => {
-  const { backendUser, session, refreshUser, signOut, isLoading } = useAuth();
+  const { backendUser, session, refreshUser, signOut, isLoading, backendError } = useAuth();
   
   const [formData, setFormData] = useState({
     name: "",
@@ -26,6 +26,7 @@ const SettingsPage = () => {
     interests: "",
     links: "",
     profileImg: AVATAR_OPTIONS[0],
+    status: "",
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -40,6 +41,7 @@ const SettingsPage = () => {
         interests: backendUser.interests || "",
         links: backendUser.links || "",
         profileImg: backendUser.profileImg || AVATAR_OPTIONS[0],
+        status: backendUser.status || "",
       });
     }
   }, [backendUser]);
@@ -88,7 +90,10 @@ const SettingsPage = () => {
         <div className="flex flex-col items-center gap-md text-center">
           <span className="material-symbols-outlined text-[48px] text-on-surface-variant">settings_alert</span>
           <p className="text-on-surface font-headline-sm">Could not load settings</p>
-          <p className="text-on-surface-variant font-body-md max-w-sm">There was a problem connecting to the server. Please try signing out and signing back in.</p>
+          <p className="text-on-surface-variant font-body-md max-w-sm">
+            {backendError || "There was a problem connecting to the server. Please try signing out and signing back in."}
+          </p>
+
           <button onClick={signOut} className="mt-md bg-primary text-on-primary px-lg py-sm rounded-lg font-label-sm uppercase font-bold">
             Sign Out
           </button>
@@ -125,34 +130,63 @@ const SettingsPage = () => {
             </h2>
 
             {/* Avatar Selection */}
-            <div className="flex items-center gap-lg">
-              <div className="relative group cursor-pointer">
-                <img
-                  alt="Current Avatar"
-                  src={formData.profileImg}
-                  className="w-24 h-24 rounded-full object-cover border-2 border-surface-variant bg-surface-container-low"
-                />
-              </div>
-              <div className="flex flex-col gap-sm w-full max-w-sm">
-                <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
-                  Select Avatar
-                </label>
-                <select
-                  name="profileImg"
-                  value={formData.profileImg}
-                  onChange={handleChange}
-                  className="bg-surface-container-low border border-outline-variant rounded-lg px-md py-sm font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all w-full"
-                >
-                  {AVATAR_OPTIONS.map((avatar, index) => (
-                    <option key={avatar} value={avatar}>
-                      Avatar {index + 1}
-                    </option>
-                  ))}
-                </select>
+            <div className="flex flex-col gap-md">
+              <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                Select Avatar
+              </label>
+              <div className="grid grid-cols-5 md:grid-cols-10 gap-sm">
+                {AVATAR_OPTIONS.map((avatar, index) => (
+                  <button
+                    key={avatar}
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, profileImg: avatar }))}
+                    className={`relative w-16 h-16 rounded-full overflow-hidden border-2 transition-all cursor-pointer hover:scale-105 ${
+                      formData.profileImg === avatar
+                        ? "border-primary ring-2 ring-primary ring-offset-2 ring-offset-surface scale-105 bg-surface-variant"
+                        : "border-surface-variant bg-surface-container-low hover:border-primary/50"
+                    }`}
+                  >
+                    <img
+                      alt={`Avatar Option ${index + 1}`}
+                      src={avatar}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
               </div>
             </div>
 
             <hr className="border-outline-variant border-t" />
+
+            {/* Status Selection */}
+            <div className="flex flex-col gap-md mt-sm">
+              <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                Current Status
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-sm">
+                {[
+                  { value: "⚡ Active", label: "⚡ Active" },
+                  { value: "📚 Studying", label: "📚 Studying" },
+                  { value: "🎯 Goal-oriented", label: "🎯 Goal-oriented" },
+                  { value: "🏗️ Building", label: "🏗️ Building" },
+                ].map((statusObj) => (
+                  <button
+                    key={statusObj.value}
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, status: statusObj.value }))}
+                    className={`py-sm px-md rounded-lg border font-body-md text-center transition-all ${
+                      formData.status === statusObj.value
+                        ? "bg-primary/20 text-primary border-primary ring-1 ring-primary"
+                        : "bg-surface-container-low text-on-surface-variant border-surface-variant hover:border-primary/50"
+                    }`}
+                  >
+                    {statusObj.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <hr className="border-outline-variant border-t mt-sm" />
 
             {/* Form Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">

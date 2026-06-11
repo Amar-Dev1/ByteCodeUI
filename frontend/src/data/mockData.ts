@@ -183,7 +183,7 @@ The migration took 4 months but the results speak for themselves: 40% reduction 
 
 export const mockEvents: IEvent[] = [
   {
-    id: "1",
+    _id: "1",
     title: "Global Hack Summit",
     description:
       "Join top developers for a 48-hour challenge building the next generation of decentralized apps.",
@@ -193,7 +193,7 @@ export const mockEvents: IEvent[] = [
     location: "Online",
   },
   {
-    id: "2",
+    _id: "2",
     title: "Design Systems Deep Dive",
     description:
       "An interactive workshop on scaling UI architecture across large engineering teams.",

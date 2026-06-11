@@ -50,7 +50,7 @@ const SetUsernamePage = () => {
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-primary/20 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-secondary/20 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="w-[95%] lg:w-[80%] max-w-md bg-surface/80 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl z-10 animate-fade-in-up">
+      <div className="w-[95%] lg:w-[50%] bg-surface/80 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl z-10 animate-fade-in-up">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-tr from-primary to-secondary rounded-2xl flex items-center justify-center mx-auto mb-6 transform rotate-3 hover:rotate-6 transition-transform shadow-lg">
             <span className="text-3xl font-bold text-white">{"{ }"}</span>

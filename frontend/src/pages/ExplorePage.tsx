@@ -194,7 +194,7 @@ const ExplorePage = () => {
                         transition={{ delay: i * 0.05 }}
                       >
                         <Link
-                          to={`/community/blogs/${post.slug?.current || post.slug}`}
+                          to={`/community/blogs/${typeof post.slug === 'object' ? post.slug?.current : post.slug}`}
                           className="bg-surface-container-low border border-outline-variant rounded-xl overflow-hidden hover:border-primary transition-colors group cursor-pointer flex flex-col h-full"
                         >
                           <div className="h-40 relative overflow-hidden shrink-0">
@@ -256,7 +256,7 @@ const ExplorePage = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-lg">
                     {events.map((event, i) => (
                       <motion.div
-                        key={event.id || i}
+                        key={event._id || i}
                         initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05 }}
@@ -299,11 +299,6 @@ const ExplorePage = () => {
                               {event.description}
                             </p>
                             <div className="flex items-center gap-xs text-on-surface-variant text-label-sm font-label-sm uppercase tracking-wider mt-auto pt-sm border-t border-outline-variant/50">
-                              <span className="material-symbols-outlined text-[16px]">
-                                {event.category === "Virtual"
-                                  ? "videocam"
-                                  : "location_on"}
-                              </span>
                               <span className="line-clamp-1">
                                 {event.location}
                               </span>
@@ -326,18 +321,21 @@ const ExplorePage = () => {
                         transition={{ delay: i * 0.05 }}
                         className="bg-surface-container-low border border-outline-variant rounded-xl p-lg flex items-center gap-lg hover:border-primary transition-colors group"
                       >
-                        <Link to={`community/users/${user.id}`}>
+                        <Link to={`/community/users/${user.id}`}>
                           <img
-                            src={user.profileImg || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
+                            src={
+                              user.profileImg ||
+                              `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`
+                            }
                             alt={user.name}
                             className="w-14 h-14 rounded-full object-cover border-2 border-outline-variant group-hover:border-primary transition-colors shrink-0"
                           />
                         </Link>
                         <div className="flex flex-col min-w-0">
-                          <Link to={`community/users/${user.id}`}>
-                          <h3 className="font-headline-sm text-on-surface font-bold group-hover:text-primary transition-colors truncate">
-                            {user.name}
-                          </h3>
+                          <Link to={`/community/users/${user.id}`}>
+                            <h3 className="font-headline-sm text-on-surface font-bold group-hover:text-primary transition-colors truncate">
+                              {user.name}
+                            </h3>
                           </Link>
                           <span className="font-body-md text-on-surface-variant truncate">
                             @{user.username}

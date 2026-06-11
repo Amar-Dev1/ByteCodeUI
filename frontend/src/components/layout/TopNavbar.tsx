@@ -1,11 +1,13 @@
 import { NavLink } from "react-router-dom";
-import { mockUser } from "../../data/mockData";
+import { useAuth } from "../../context/AuthContext";
 
 interface ITopNavbarProps {
   onMenuToggle?: () => void;
 }
 
 const TopNavbar = ({ onMenuToggle }: ITopNavbarProps) => {
+  const { backendUser } = useAuth();
+
   return (
     <nav className="bg-surface flex justify-between items-center h-16 px-gutter w-full sticky top-0 z-50 lg:hidden">
       <div className="flex items-center gap-md">
@@ -18,7 +20,7 @@ const TopNavbar = ({ onMenuToggle }: ITopNavbarProps) => {
         <div className="hidden md:flex ml-lg gap-md font-body-md text-body-md"></div>
       </div>
       <div className="flex items-center gap-md">
-        {mockUser ? null : (
+        {!backendUser && (
           <>
             <button className="hidden md:block font-body-md text-body-md text-primary hover:bg-surface-container-low px-md py-sm rounded-lg transition-colors">
               Log In
@@ -43,3 +45,4 @@ const TopNavbar = ({ onMenuToggle }: ITopNavbarProps) => {
 };
 
 export default TopNavbar;
+

@@ -1,36 +1,31 @@
 import { useState, useEffect } from "react";
 import { FetchNews } from "../services";
 
-const getTagColors = (tag: string) => {
-  switch (tag.toUpperCase()) {
-    case "RELEASE":
-    case "INSIGHT":
-    case "UPDATE":
-      return "text-primary bg-primary/10";
-    case "SECURITY":
-      return "text-secondary bg-secondary/10";
-    case "COMMUNITY":
-      return "text-tertiary bg-tertiary/10";
-    default:
-      return "text-primary bg-primary/10";
-  }
-};
 
 const TechNewsPage = () => {
   const [news, setNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  const loadNews = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const data = await FetchNews();
+      if (data === null) {
+        setError(true);
+      } else {
+        setNews(data);
+      }
+    } catch (err) {
+      console.error(err);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadNews = async () => {
-      try {
-        const data = await FetchNews();
-        setNews(data || []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
     loadNews();
   }, []);
 
@@ -41,6 +36,24 @@ const TechNewsPage = () => {
           progress_activity
         </span>
         <p className="text-on-surface-variant">Loading tech news...</p>
+        <p className="text-on-surface-variant font-label-sm text-sm opacity-70 mt-xs">This may take up to a minute on the first load.</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] w-full gap-md">
+        <span className="material-symbols-outlined text-[48px] text-error">
+          error
+        </span>
+        <p className="text-on-surface">Failed to load tech news.</p>
+        <button
+          onClick={loadNews}
+          className="bg-primary text-on-primary px-lg py-sm rounded-lg font-label-sm uppercase font-bold hover:bg-primary/90 transition-colors"
+        >
+          Try Again
+        </button>
       </div>
     );
   }

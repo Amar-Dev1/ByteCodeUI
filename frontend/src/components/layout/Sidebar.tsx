@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { mockUser } from "../../data/mockData";
+import { useAuth } from "../../context/AuthContext";
 
 interface ISidebarProps {
   isOpen: boolean;
@@ -8,6 +8,8 @@ interface ISidebarProps {
 }
 
 const Sidebar = ({ isOpen, onClose }: ISidebarProps) => {
+  const { backendUser, signOut } = useAuth();
+
   const mainLinks = [
     { label: "Explore", icon: "explore", path: "/community" },
     { label: "Blogs", icon: "article", path: "/community/blogs" },
@@ -17,6 +19,9 @@ const Sidebar = ({ isOpen, onClose }: ISidebarProps) => {
     { label: "My Profile", icon: "person", path: "/community/profile" },
     { label: "Settings", icon: "settings", path: "/community/settings" },
   ];
+
+  const displayName = backendUser?.name || backendUser?.username || "User";
+  const displayInitials = displayName.substring(0, 2).toUpperCase();
 
   return (
     <>
@@ -51,20 +56,35 @@ const Sidebar = ({ isOpen, onClose }: ISidebarProps) => {
 
         {/* User Profile Header */}
         <div className="flex items-center gap-md mb-lg px-sm">
-          <img
-            src={
-              mockUser.avatar ||
-              "https://lh3.googleusercontent.com/aida-public/AB6AXuD2m4g-OVpHkAaLvebn1hNjBx9qCGNslCKFMnwwmioWVe4UfNLWCNjOSebj3WhSwTQT6z9qOYFzjkuh2jr4RmwN9rLeIxEVI-8o0fZBRXLeZG-oe4xM5cun02SHEwI65w5oetNnK6Kh646HemoRKapA2hmNKus8f2V2GllK86DUdCYqSc0D0xEPGidNYWZdZCoxImgeZvFA6OkS1fVxNC6HHx-_0jxi7lAGyOvGkYpXYbN9XDEEue6LeoEdrPic98YzVO17R5LmzWU"
-            }
-            alt="User profile"
-            className="w-12 h-12 rounded-full object-cover border border-outline-variant"
-          />
-          <div className="flex flex-col">
-            <span className="font-body-md text-body-md font-semibold text-on-surface">
-              {mockUser.name}
+          <div className="relative flex-shrink-0">
+            {backendUser?.profileImg ? (
+              <img
+                src={backendUser.profileImg}
+                alt="User profile"
+                className="w-12 h-12 rounded-full object-cover border border-outline-variant"
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-full border border-outline-variant bg-primary/10 flex items-center justify-center">
+                <span className="text-primary font-bold text-base">
+                  {displayInitials}
+                </span>
+              </div>
+            )}
+            {backendUser?.status && (
+              <div
+                className="absolute -bottom-1 -right-1 bg-surface-container-lowest rounded-full p-0.5 border border-outline-variant flex items-center justify-center"
+                title={backendUser.status}
+              >
+                <span className="text-xs" style={{ lineHeight: 1 }}>{backendUser.status.split(' ')[0]}</span>
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="font-body-md text-body-md font-semibold text-on-surface truncate">
+              {displayName}
             </span>
-            <span className="font-label-sm text-label-sm text-on-surface-variant">
-              University Chapter
+            <span className="font-label-sm text-label-sm text-on-surface-variant truncate">
+              {backendUser?.role || "University Chapter"}
             </span>
           </div>
         </div>
@@ -109,24 +129,12 @@ const Sidebar = ({ isOpen, onClose }: ISidebarProps) => {
           ))}
         </nav>
 
-        {/* <div className="mt-auto"></div> */}
-
         {/* Footer Navigation */}
         <div className="flex flex-col gap-sm pt-md border-t border-outline-variant">
-          <NavLink
-            to="/community/help"
-            onClick={onClose}
-            className="flex items-center gap-md text-on-surface-variant hover:bg-surface-variant rounded-lg px-md py-sm transition-all cursor-pointer active:opacity-80"
+          <button
+            onClick={signOut}
+            className="flex items-center gap-md text-error hover:bg-surface-variant rounded-lg px-md py-sm transition-all cursor-pointer active:opacity-80 w-full"
           >
-            <span
-              className="material-symbols-outlined"
-              style={{ fontVariationSettings: "'FILL' 0" }}
-            >
-              help
-            </span>
-            <span className="font-label-sm text-label-sm uppercase">Help</span>
-          </NavLink>
-          <button className="flex items-center gap-md text-error hover:bg-surface-variant rounded-lg px-md py-sm transition-all cursor-pointer active:opacity-80 w-full">
             <span
               className="material-symbols-outlined"
               style={{ fontVariationSettings: "'FILL' 0" }}
@@ -144,3 +152,4 @@ const Sidebar = ({ isOpen, onClose }: ISidebarProps) => {
 };
 
 export default Sidebar;
+

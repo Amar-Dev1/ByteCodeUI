@@ -1,10 +1,37 @@
-import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { FetchUserById } from "../services";
 
-const ProfilePage = () => {
-  const { backendUser, isLoading, backendError, refreshUser } = useAuth();
+const UserProfilePage = () => {
+  const { id } = useParams<{ id: string }>();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (isLoading) {
+  useEffect(() => {
+    const loadUser = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await FetchUserById(id!);
+        if (data && !data.error) {
+          setUser(data);
+        } else {
+          setError("User not found or an error occurred.");
+        }
+      } catch (err) {
+        setError("Failed to fetch user profile.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (id) {
+      loadUser();
+    }
+  }, [id]);
+
+  if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-md">
@@ -15,34 +42,28 @@ const ProfilePage = () => {
     );
   }
 
-  if (!backendUser) {
+  if (error || !user) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-md text-center">
           <span className="material-symbols-outlined text-[48px] text-on-surface-variant">account_circle</span>
           <p className="text-on-surface font-headline-sm">Could not load profile</p>
           <p className="text-on-surface-variant font-body-md max-w-sm">
-            {backendError || "There was a problem connecting to the server. Please try signing out and signing back in."}
+            {error || "The requested user could not be found."}
           </p>
-          <button
-            onClick={refreshUser}
-            className="mt-md bg-primary text-on-primary px-lg py-sm rounded-lg font-label-sm uppercase font-bold"
-          >
-            Try Again
-          </button>
         </div>
       </div>
     );
   }
 
   // parse interests from comma separated string
-  const interests = backendUser.interests ? backendUser.interests.split(',').map(i => i.trim()).filter(i => i) : [];
+  const interests = user.interests ? user.interests.split(',').map((i: string) => i.trim()).filter((i: string) => i) : [];
   
   // parse links from comma separated string
-  const linksArray = backendUser.links ? backendUser.links.split(',').map(i => i.trim()).filter(i => i) : [];
-  const githubLink = linksArray.find(l => l.includes('github.com'));
-  const linkedinLink = linksArray.find(l => l.includes('linkedin.com'));
-  const websiteLink = linksArray.find(l => !l.includes('github.com') && !l.includes('linkedin.com'));
+  const linksArray = user.links ? user.links.split(',').map((i: string) => i.trim()).filter((i: string) => i) : [];
+  const githubLink = linksArray.find((l: string) => l.includes('github.com'));
+  const linkedinLink = linksArray.find((l: string) => l.includes('linkedin.com'));
+  const websiteLink = linksArray.find((l: string) => !l.includes('github.com') && !l.includes('linkedin.com'));
 
   return (
     <div className="flex-1 p-gutter md:p-xl w-full lg:w-[80vw]">
@@ -50,19 +71,19 @@ const ProfilePage = () => {
       <div className="relative bg-surface-container-high rounded-xl overflow-hidden border border-outline-variant mb-lg p-xl flex flex-col items-center justify-center gap-md">
         {/* Avatar */}
         <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-surface-container-lowest bg-surface-variant flex items-center justify-center relative shadow-sm overflow-hidden">
-          {backendUser.profileImg ? (
-            <img src={backendUser.profileImg} alt="Profile" className="w-full h-full object-cover" />
+          {user.profileImg ? (
+            <img src={user.profileImg} alt="Profile" className="w-full h-full object-cover" />
           ) : (
             <span className="text-4xl md:text-5xl font-bold text-on-surface uppercase">
-              {backendUser.name ? backendUser.name.substring(0, 2) : backendUser.username?.substring(0, 2)}
+              {user.name ? user.name.substring(0, 2) : user.username?.substring(0, 2)}
             </span>
           )}
-          {backendUser.status && (
+          {user.status && (
             <div
-              className="absolute bottom-1 right-1 bg-surface-container-lowest rounded-full p-xs border border-outline-variant flex items-center justify-center w-10 h-10"
-              title={backendUser.status}
+              className="absolute bottom-1 right-1 bg-surface-container-lowest rounded-full p-xs border border-outline-variant flex items-center justify-center"
+              title="Current Status"
             >
-              <span className="text-xl">{backendUser.status.split(' ')[0]}</span>
+              <span className="text-xl flex items-center justify-center" style={{ lineHeight: 1 }}>{user.status.split(' ')[0]}</span>
             </div>
           )}
         </div>
@@ -70,15 +91,17 @@ const ProfilePage = () => {
         {/* Name & Title */}
         <div className="text-center flex flex-col items-center">
           <h2 className="font-headline-lg text-headline-lg text-on-surface mb-xs flex items-center justify-center gap-sm">
-            {backendUser.name || backendUser.username}
+            {user.name || user.username}
           </h2>
           <p className="font-body-md text-on-surface-variant text-body-md">
-            @{backendUser.username} {backendUser.role ? `• ${backendUser.role}` : ''}
+            @{user.username} {user.role ? `• ${user.role}` : ''}
           </p>
+          {user.status && (
+            <div className="mt-sm bg-surface-variant text-on-surface-variant px-sm py-xs rounded-full font-label-sm text-sm border border-outline-variant">
+              {user.status}
+            </div>
+          )}
         </div>
-
-        {/* Actions */}
-          <Link to="/community/settings" className="bg-surface-container-lowest border border-outline-variant text-on-surface font-label-sm text-label-sm px-lg py-4 rounded-lg hover:bg-surface-variant transition-colors flex items-center justify-center gap-sm mt-sm">Edit Profile</Link>
       </div>
 
       {/* Content Grid — sidebar + main area */}
@@ -94,7 +117,7 @@ const ProfilePage = () => {
               About
             </h3>
             <p className="font-body-md text-body-md text-on-surface-variant mb-md">
-              {backendUser.bio || "No bio provided."}
+              {user.bio || "No bio provided."}
             </p>
             <div className="flex flex-col gap-sm">
               {websiteLink && (
@@ -171,7 +194,7 @@ const ProfilePage = () => {
               Interests & Tech
             </h3>
             <div className="flex flex-wrap gap-sm">
-              {interests.length > 0 ? interests.map((interest) => (
+              {interests.length > 0 ? interests.map((interest: string) => (
                 <span
                   key={interest}
                   className="bg-primary-container/10 text-primary border border-primary/20 font-code-md text-code-md px-sm py-xs rounded"
@@ -189,4 +212,4 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage;
+export default UserProfilePage;

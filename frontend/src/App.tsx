@@ -12,6 +12,7 @@ import TechNewsPage from "./pages/TechNewsPage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import SetUsernamePage from "./pages/SetUsernamePage";
+import UserProfilePage from "./pages/UserProfilePage";
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
             <Route path="blogs" element={<BlogsPage />} />
             <Route path="blogs/:slug" element={<BlogPostPage />} />
             <Route path="news" element={<TechNewsPage />} />
+            <Route path="users/:id" element={<UserProfilePage />} />
           </Route>
         </Route>
       </Route>

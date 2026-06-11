@@ -21,6 +21,14 @@ export interface IUser {
   };
 }
 
+export interface IComment {
+  _key: string;
+  username: string;
+  profileImg?: string;
+  comment: string;
+  createdAt: string;
+}
+
 export interface IBlogPost {
   id: string;
   _id?: string;
@@ -40,16 +48,16 @@ export interface IBlogPost {
 }
 
 export interface IEvent {
-  id: string;
+  _id: string;
   title: string;
   description: string;
-  category: "Activity" | "Session";
+  category: "Activity" | "Session" | "Event";
   image?: string;
   startDate: string;
   endDate?: string;
   location: string;
-  assets: { name: string; url: string }[];
-  organizers: {
+  assets?: { name: string; url: string }[];
+  organizers?: {
     name: string;
     role: string;
     image?: {

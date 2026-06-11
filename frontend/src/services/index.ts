@@ -1,4 +1,8 @@
+// @ts-ignore
 import { client } from "../client";
+import axios from "axios";
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL as string;
 
 export const FetchBlogs = async () => {
   try {
@@ -108,11 +112,16 @@ export const UpdateBlogLikes = async (id: string, value: number = 1) => {
   }
 };
 
-export const UpdateBlogComments = async (id: string, comment: string) => {
+export const UpdateBlogComments = async (
+  id: string,
+  commentData: { username: string; profileImg?: string; comment: string; createdAt: string }
+) => {
   try {
+    const _key = Math.random().toString(36).substring(2, 15);
     const updateBlog = await client
       .patch(id)
-      .append({ userId: id, comment })
+      .setIfMissing({ comments: [] })
+      .append('comments', [{ _key, ...commentData }])
       .commit();
     return updateBlog;
   } catch (err) {
@@ -120,13 +129,36 @@ export const UpdateBlogComments = async (id: string, comment: string) => {
   }
 };
 
+export const FetchBlogComments = async (id: string) => {
+  try {
+    const query = `*[_type == "blog" && _id == $id][0].comments`;
+    const comments = await client.fetch(query, { id });
+    return comments || [];
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+};
+
 export const FilterUsers = async (name: string) => {
   try {
-    const res = await fetch(`http://localhost:3000/users/${name}`);
+    const res = await fetch(`${backendUrl}/users/${name}`);
     const users = await res.json();
     return users;
   } catch (err) {
     console.error(err);
+  }
+};
+
+export const FetchUserById = async (id: string | number) => {
+  try {
+    const res = await fetch(`${backendUrl}/users/id/${id}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const user = await res.json();
+    return user;
+  } catch (err) {
+    console.error('[FetchUserById] Failed:', err);
+    return null;
   }
 };
 
@@ -274,15 +306,20 @@ export const FetchSingleEvent = async (id: string) => {
   }
 };
 
-export const FetchNews = async (): Promise<any[]> => {
+export const FetchNews = async (retryCount = 1): Promise<any[] | null> => {
   try {
-    const res = await fetch("http://localhost:3000/news/get-rss");
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const news = await res.json();
+    const res = await axios.get(`${backendUrl}/news/get-rss`, {
+      timeout: 60000, // 60 seconds
+    });
+    const news = res.data;
     // Guard: backend must return an array; fallback to [] if not
     return Array.isArray(news) ? news : [];
   } catch (err) {
-    console.error('[FetchNews] Failed:', err);
-    return [];
+    console.error(`[FetchNews] Failed (retries left: ${retryCount}):`, err);
+    if (retryCount > 0) {
+      console.log("[FetchNews] Retrying...");
+      return FetchNews(retryCount - 1);
+    }
+    return null;
   }
 };
