@@ -120,23 +120,11 @@ export const UpdateBlogComments = async (id: string, comment: string) => {
   }
 };
 
-export const FetchUsers = async (name: string) => {
+export const FilterUsers = async (name: string) => {
   try {
-    const MockUsers = [
-      {
-        _id: "1",
-        name: "John Doe",
-        username: "johndoe",
-        image: "https://randomuser.me/api/portraits/men/1.jpg",
-      },
-      {
-        _id: "2",
-        name: "Jane Doe",
-        username: "janedoe",
-        image: "https://randomuser.me/api/portraits/women/1.jpg",
-      },
-    ];
-    return MockUsers;
+    const res = await fetch(`http://localhost:3000/users/${name}`);
+    const users = await res.json();
+    return users;
   } catch (err) {
     console.error(err);
   }
@@ -283,5 +271,18 @@ export const FetchSingleEvent = async (id: string) => {
     return event;
   } catch (err) {
     console.error(err);
+  }
+};
+
+export const FetchNews = async (): Promise<any[]> => {
+  try {
+    const res = await fetch("http://localhost:3000/news/get-rss");
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const news = await res.json();
+    // Guard: backend must return an array; fallback to [] if not
+    return Array.isArray(news) ? news : [];
+  } catch (err) {
+    console.error('[FetchNews] Failed:', err);
+    return [];
   }
 };

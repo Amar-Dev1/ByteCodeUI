@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import type { IBlogPost, IEvent, ISearchUser } from "../types/interfaces";
-import { SearchBlogs, SearchEvents, FetchUsers } from "../services";
+import { SearchBlogs, SearchEvents, FilterUsers } from "../services";
 
 type FilterType = "blogs" | "events" | "users";
 
@@ -38,7 +38,7 @@ const ExplorePage = () => {
         setBlogs([]);
         setUsers([]);
       } else {
-        const data = await FetchUsers(query);
+        const data = await FilterUsers(query);
         setUsers(data || []);
         setBlogs([]);
         setEvents([]);
@@ -318,23 +318,23 @@ const ExplorePage = () => {
                 {/* User Results */}
                 {filter === "users" && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-lg">
-                    {users.map((user, i) => (
+                    {users.map((user: any, i) => (
                       <motion.div
-                        key={user._id}
+                        key={user.id}
                         initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05 }}
                         className="bg-surface-container-low border border-outline-variant rounded-xl p-lg flex items-center gap-lg hover:border-primary transition-colors group"
                       >
-                        <Link to={`community/users/${user._id}`}>
+                        <Link to={`community/users/${user.id}`}>
                           <img
-                            src={user.image}
+                            src={user.profileImg || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
                             alt={user.name}
                             className="w-14 h-14 rounded-full object-cover border-2 border-outline-variant group-hover:border-primary transition-colors shrink-0"
                           />
                         </Link>
                         <div className="flex flex-col min-w-0">
-                          <Link to={`community/users/${user._id}`}>
+                          <Link to={`community/users/${user.id}`}>
                           <h3 className="font-headline-sm text-on-surface font-bold group-hover:text-primary transition-colors truncate">
                             {user.name}
                           </h3>

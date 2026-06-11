@@ -1,18 +1,54 @@
 import { Link } from "react-router-dom";
-import { mockUser } from "../data/mockData";
+import { useAuth } from "../context/AuthContext";
 
 const ProfilePage = () => {
-  const user = mockUser;
+  const { backendUser, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-md">
+          <span className="material-symbols-outlined text-[48px] text-primary animate-spin">progress_activity</span>
+          <p className="text-on-surface-variant font-body-md">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!backendUser) {
+    return (
+      <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-md text-center">
+          <span className="material-symbols-outlined text-[48px] text-on-surface-variant">account_circle</span>
+          <p className="text-on-surface font-headline-sm">Could not load profile</p>
+          <p className="text-on-surface-variant font-body-md max-w-sm">There was a problem connecting to the server. Please try signing out and signing back in.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // parse interests from comma separated string
+  const interests = backendUser.interests ? backendUser.interests.split(',').map(i => i.trim()).filter(i => i) : [];
+  
+  // parse links from comma separated string
+  const linksArray = backendUser.links ? backendUser.links.split(',').map(i => i.trim()).filter(i => i) : [];
+  const githubLink = linksArray.find(l => l.includes('github.com'));
+  const linkedinLink = linksArray.find(l => l.includes('linkedin.com'));
+  const websiteLink = linksArray.find(l => !l.includes('github.com') && !l.includes('linkedin.com'));
 
   return (
     <div className="flex-1 p-gutter md:p-xl w-full lg:w-[80vw]">
       {/* Hero Header */}
       <div className="relative bg-surface-container-high rounded-xl overflow-hidden border border-outline-variant mb-lg p-xl flex flex-col items-center justify-center gap-md">
         {/* Avatar */}
-        <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-surface-container-lowest bg-surface-variant flex items-center justify-center relative shadow-sm">
-          <span className="text-4xl md:text-5xl font-bold text-on-surface uppercase">
-            {user.name.substring(0, 2)}
-          </span>
+        <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-surface-container-lowest bg-surface-variant flex items-center justify-center relative shadow-sm overflow-hidden">
+          {backendUser.profileImg ? (
+            <img src={backendUser.profileImg} alt="Profile" className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-4xl md:text-5xl font-bold text-on-surface uppercase">
+              {backendUser.name ? backendUser.name.substring(0, 2) : backendUser.username?.substring(0, 2)}
+            </span>
+          )}
           <div
             className="absolute bottom-1 right-1 bg-surface-container-lowest rounded-full p-xs border border-outline-variant"
             title="Currently Building"
@@ -24,19 +60,10 @@ const ProfilePage = () => {
         {/* Name & Title */}
         <div className="text-center flex flex-col items-center">
           <h2 className="font-headline-lg text-headline-lg text-on-surface mb-xs flex items-center justify-center gap-sm">
-            {user.name}
-            {user.isVerified && (
-              <span
-                className="material-symbols-outlined text-secondary text-xl"
-                title="Verified"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                verified
-              </span>
-            )}
+            {backendUser.name || backendUser.username}
           </h2>
           <p className="font-body-md text-on-surface-variant text-body-md">
-            @{user.username} • {user.role}
+            @{backendUser.username} {backendUser.role ? `• ${backendUser.role}` : ''}
           </p>
         </div>
 
@@ -57,36 +84,30 @@ const ProfilePage = () => {
               About
             </h3>
             <p className="font-body-md text-body-md text-on-surface-variant mb-md">
-              {user.bio}
+              {backendUser.bio || "No bio provided."}
             </p>
             <div className="flex flex-col gap-sm">
               <div className="flex items-center gap-sm text-on-surface-variant font-label-sm text-label-sm">
                 <span className="material-symbols-outlined text-sm">
                   location_on
                 </span>{" "}
-                San Francisco, CA
+                Earth
               </div>
-              {user.links.website && (
+              {websiteLink && (
                 <div className="flex items-center gap-sm text-on-surface-variant font-label-sm text-label-sm">
                   <span className="material-symbols-outlined text-sm">
                     link
                   </span>{" "}
                   <a
-                    href={user.links.website}
+                    href={websiteLink.startsWith('http') ? websiteLink : `https://${websiteLink}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary hover:underline"
+                    className="text-primary hover:underline truncate max-w-[200px]"
                   >
-                    {user.links.website.replace("https://", "")}
+                    {websiteLink.replace("https://", "").replace("http://", "")}
                   </a>
                 </div>
               )}
-              <div className="flex items-center gap-sm text-on-surface-variant font-label-sm text-label-sm">
-                <span className="material-symbols-outlined text-sm">
-                  calendar_today
-                </span>{" "}
-                Joined March 2022
-              </div>
             </div>
           </div>
           {/* Social Links */}
@@ -98,9 +119,9 @@ const ProfilePage = () => {
               Connect
             </h3>
             <div className="flex flex-col gap-sm">
-              {user.links.github && (
+              {githubLink && (
                 <a
-                  href={user.links.github}
+                  href={githubLink.startsWith('http') ? githubLink : `https://${githubLink}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-md p-sm rounded hover:bg-surface-variant transition-colors group"
@@ -113,9 +134,9 @@ const ProfilePage = () => {
                   </span>
                 </a>
               )}
-              {user.links.linkedin && (
+              {linkedinLink && (
                 <a
-                  href={user.links.linkedin}
+                  href={linkedinLink.startsWith('http') ? linkedinLink : `https://${linkedinLink}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-md p-sm rounded hover:bg-surface-variant transition-colors group"
@@ -127,6 +148,9 @@ const ProfilePage = () => {
                     LinkedIn
                   </span>
                 </a>
+              )}
+              {!githubLink && !linkedinLink && (
+                <p className="text-sm text-gray-500">No social links provided.</p>
               )}
             </div>
           </div>
@@ -143,18 +167,18 @@ const ProfilePage = () => {
               Interests & Tech
             </h3>
             <div className="flex flex-wrap gap-sm">
-              {user.interests.map((interest) => (
+              {interests.length > 0 ? interests.map((interest) => (
                 <span
                   key={interest}
                   className="bg-primary-container/10 text-primary border border-primary/20 font-code-md text-code-md px-sm py-xs rounded"
                 >
                   {interest}
                 </span>
-              ))}
+              )) : (
+                <p className="text-sm text-gray-500">No interests added.</p>
+              )}
             </div>
           </div>
-
-        
         </div>
       </div>
     </div>
