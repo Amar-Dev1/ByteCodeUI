@@ -13,7 +13,7 @@
 | **Auth** | Supabase Cloud | OAuth (Google/GitHub) & JWT issuance. |
 | **Primary DB** | SQLite3 (via Prisma) | Local storage for Profiles and User metadata. |
 | **CMS/CDN** | Sanity.io | Headless CMS for Blogs, Events, and Assets. |
-| **Hosting** | GitHub Pages / Docker | Frontend static hosting & Dockerized API. |
+| **Hosting** | Netlify.com / Docker | Frontend static hosting & Dockerized API. |
 
 ---
 
@@ -41,7 +41,8 @@
 * **Events:**
 * `title`, `image`, `category` (Activity, Session).
 * `dates`: `start_date`, `end_date`.
-* `assets`: Array of Files/Images (Syllabi, Docs, Slides).
+* `assets`: Array of Files/Images (Docs, Slides).
+* `Location` : (remote | real place).
 
 
 
@@ -58,10 +59,10 @@
 
 ### The News Service (RSS Aggregator)
 
-* **Endpoint:** `GET /api/news`
+* **Endpoint:** `GET /api/news/get-rss`
 * **Logic:**
 * Check **Memory Cache** (NestJS `CacheModule`).
-* If cache miss: Parse RSS via `rss-parser` (TechCrunch, Al-Arabiya).
+* If cache miss: Parse RSS via `rss-parser`.
 * **Transformation:** Slice descriptions to 250–300 chars, detect language (AR/EN).
 * Return 10 most recent items.
 
@@ -100,16 +101,6 @@
 
 ## 📦 Deployment Plan
 
-1. **Frontend:** Build React app → Deploy to **GitHub Pages** (utilizing `js.org` domain).
+1. **Frontend:** Build React app → Deploy to **Netlify**.
 2. **Backend:** Dockerize NestJS + SQLite DB.
 3. **Persistence:** Use Docker Volumes to ensure the `.sqlite` file survives container restarts.
-
----
-
-### Implementation Priority (The "Battle Plan")
-
-0. **Phase 0:** Scafold the frontned first. Make sure it is responsive and mobile-first. Use TailwindCSS and Framer motion.
-1. **Phase 1:** Auth & SQLite Profile setup (The Foundation).
-2. **Phase 2:** Sanity Integration for Blogs/Events (The Content).
-3. **Phase 3:** News Service & RSS Parsing (The Automation).
-4. **Phase 4:** Search & Explore logic (The Community).
